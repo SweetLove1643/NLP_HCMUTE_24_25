@@ -935,8 +935,6 @@ elif selected_option == "Phân loại dữ liệu":
                 st.pyplot(g.fig, use_container_width=True)
             except Exception as e:
                 st.error(f"Lỗi khi vẽ biểu đồ: {e}")
-
-
 elif selected_option == "Recommendation":
     st.header("Recommendation")
     user_id = st.number_input("Nhập userid (1 -> 610)", min_value=1, max_value=610, value=1, key="user_id")
