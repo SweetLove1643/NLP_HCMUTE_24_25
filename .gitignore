@@ -1,3 +1,4 @@
 Application/datasets/IMDBDataset.csv 
 Application/datasets/DBPEDIA.csv 
 Application/datasets/AmazonReviews.csv 
+Application/.venv
