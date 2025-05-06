@@ -1,6 +1,7 @@
 # streamlit run c:/Users/Admin/Documents/Study/Projects/HK6/NLP/Application/main.py
 import streamlit as st
 from numpy import triu
+import pandas as pd
 
 import CollectionData as cl
 import DataAugment as da
@@ -43,19 +44,54 @@ selected_option = st.sidebar.selectbox("Chọn chức năng", menu_options)
 
 if selected_option == "Thu thập dữ liệu":
     st.header("Thu thập dữ liệu")
-    option_collectiondata = ["Crawl web", "Txt"]
+    option_collectiondata = ["Crawl web", "Tải dữ liệu từ tệp"]
     tab1, tab2 = st.tabs(option_collectiondata)
     with tab1:
         st.subheader("Crawl")
         st.text_input("Url", disabled=True, value=cl.web_url)
         dataframe = cl.CollectionData()
-        selected = st.dataframe(dataframe, use_container_width=True)
+        selected = st.dataframe(dataframe, use_container_width=True, key="dataframe", hide_index=True)
     with tab2:
-        st.subheader("TXT")
-        uploaded_file = st.file_uploader("Chọn file .txt", type=["txt"])
-        if uploaded_file:
-            content = cl.Inputtxt(uploaded_file)
-            st.text_area("Dữ liệu từ file", content if content else "", height=300)
+        st.subheader("Tải dữ liệu từ tệp")
+        uploaded_file = st.file_uploader("Chọn file", type=["txt", "csv", "json", "docx"])
+        if uploaded_file is not None:
+            st.write("Tên tệp:", uploaded_file.name)
+            
+            # Đọc nội dung tệp ngay khi tải lên
+            content = cl.read_file(uploaded_file)
+            
+            # Nút xem nội dung
+            if st.button("Xem nội dung tệp"):
+                if content is not None:
+                    if uploaded_file.name.endswith('.csv'):
+                        st.dataframe(content, use_container_width=True, key="csv")
+                    elif uploaded_file.name.endswith('.json'):
+                        st.json(content, expanded=True)
+                    elif uploaded_file.name.endswith('.docx'):
+                        st.text_area("Nội dung tệp DOCX", content, height=300, key="docx")
+                    elif uploaded_file.name.endswith('.txt'):
+                        st.text_area("Dữ liệu từ file", content, height=300, key="txt")
+                else:
+                    st.warning("Tệp không hợp lệ hoặc không thể đọc. Vui lòng kiểm tra định dạng.")
+
+            # Nút lưu dữ liệu
+            if st.button("Lưu dữ liệu"):
+                if content is not None:
+                    st.session_state.data_input = content
+                    st.write("Dữ liệu đã lưu:")
+                    # Hiển thị dữ liệu theo loại
+                    if isinstance(content, pd.DataFrame):
+                        st.dataframe(content, use_container_width=True, key="saved_csv")
+                    elif isinstance(content, (dict, list)):
+                        st.json(content, expanded=True, key="saved_json")
+                    else:
+                        st.text_area("Dữ liệu", content, height=300, key="saved_data")
+                    st.success("Dữ liệu đã được lưu thành công!")
+                else:
+                    st.warning("Không có dữ liệu để lưu. Vui lòng tải lên tệp hợp lệ.")
+
+        else:
+            st.info("Vui lòng tải lên một tệp để tiếp tục.")
 elif selected_option == "Tăng cường dữ liệu":
     augment_tab = ["Thêm từ", "Thay từ", "Đổi vị trí", "Back translate", "Thay thực thể", "Từ đồng nghĩa", "Tách từ", "Lỗi keyboard"]
     st.header("Tăng cường dữ liệu")
@@ -66,56 +102,93 @@ elif selected_option == "Tăng cường dữ liệu":
         if st.button("Tăng cường", key="NLPInsert1"):
             
             st.session_state.data_input = aug_text
-            st.text_area("Thêm từ", value=da.NLPInsert(aug_text), key="NLPInsert2")
+            value = da.NLPInsert(aug_text)
+            st.text_area("Thêm từ", value=value, key="NLPInsert2")
+            if st.button("Lưu dữ liệu", key="NLPInsert3"):
+                st.session_state.data_input = value
+                print(st.session_state.data_input)
+                st.text_area("Thêm từ", value=st.session_state.data_input, key="NLPInsert4")
+                st.success("Lưu dữ liệu thành công!")
     with tab2:
         st.header("Thay từ")
         aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSub")
         if st.button("Tăng cường", key="NLPSub1"):
             
             st.session_state.data_input = aug_text
-            st.text_area("Thay từ", value=da.NLPSubstitute(aug_text), key="NLPSub2")
+            value=da.NLPSubstitute(aug_text)
+            st.text_area("Thay từ", value=value, key="NLPSub2")
+            if st.button("Lưu dữ liệu", key="NLPSub3"):
+                st.session_state.data_input = value
+                st.text_area("Thay từ", value=st.session_state.data_input, key="NLPSub4")
+                st.success("Lưu dữ liệu thành công!")
+
     with tab3:
         st.header("Đổi vị trí")
         aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSwap")
         if st.button("Tăng cường", key="NLPSwap1"):
             
             st.session_state.data_input = aug_text
-            st.text_area("Đổi vị trí", value=da.NLPSwap(aug_text), key="NLPSwap2")
+            value=da.NLPSwap(aug_text)
+            st.text_area("Đổi vị trí", value=value, key="NLPSwap2")
+            if st.button("Lưu dữ liệu", key="NLPSwap3"):
+                st.session_state.data_input = value
+                st.text_area("Đổi vị trí", value=st.session_state.data_input, key="NLPSwap4")
+                st.success("Lưu dữ liệu thành công!")
     with tab4:
         st.header("Back translate")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPBackTranslate")
+        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPBackTranslate")
         if st.button("Tăng cường", key="NLPBackTranslate1"):
-            
             st.session_state.data_input = aug_text
-            st.text_area("Back translate", value=da.NLPBackTranslate(aug_text), key="NLPBackTranslate2")
+            value = da.NLPBackTranslate(aug_text)
+            st.text_area("Back translate", value=value, key="NLPBackTranslate2")
+            if st.button("Lưu dữ liệu", key="NLPBackTranslate3"):
+                st.session_state.data_input = value
+                st.text_area("Back translate", value=st.session_state.data_input, key="NLPBackTranslate4")
+                st.success("Lưu dữ liệu thành công!")
     with tab5:
         st.header("Thay thực thể")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPReserved")
+        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPReserved")
         if st.button("Tăng cường", key="NLPReserved1"):
-            
             st.session_state.data_input = aug_text
-            st.text_area("Thay thực thể", value=da.NLPReserved(aug_text), key="NLPReserved2")
+            value = da.NLPReserved(aug_text)
+            st.text_area("Thay thực thể", value=value, key="NLPReserved2")
+            if st.button("Lưu dữ liệu", key="NLPReserved3"):
+                st.session_state.data_input = value
+                st.text_area("Thay thực thể", value=st.session_state.data_input, key="NLPReserved4")
+                st.success("Lưu dữ liệu thành công!")
     with tab6:
         st.header("Từ đồng nghĩa")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSynonym")
+        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPSynonym")
         if st.button("Tăng cường", key="NLPSynonym1"):
-            
             st.session_state.data_input = aug_text
-            st.text_area("Từ đồng nghĩa", value=da.NLPSynonym(aug_text), key="NLPSynonym2")
+            value = da.NLPSynonym(aug_text)
+            st.text_area("Từ đồng nghĩa", value=value, key="NLPSynonym2")
+            if st.button("Lưu dữ liệu", key="NLPSynonym3"):
+                st.session_state.data_input = value
+                st.text_area("Từ đồng nghĩa", value=st.session_state.data_input, key="NLPSynonym4")
+                st.success("Lưu dữ liệu thành công!")
     with tab7:
         st.header("Tách từ")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSplit")
+        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPSplit")
         if st.button("Tăng cường", key="NLPSplit1"):
-            
             st.session_state.data_input = aug_text
-            st.text_area("Tách từ", value=da.NLPSplit(aug_text), key="NLPSplit2")
+            value = da.NLPSplit(aug_text)
+            st.text_area("Tách từ", value=value, key="NLPSplit2")
+            if st.button("Lưu dữ liệu", key="NLPSplit3"):
+                st.session_state.data_input = value
+                st.text_area("Tách từ", value=st.session_state.data_input, key="NLPSplit4")
+                st.success("Lưu dữ liệu thành công!")
     with tab8:
         st.header("Lỗi keyboard")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPKeyboard")
+        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPKeyboard")
         if st.button("Tăng cường", key="NLPKeyboard1"):
-            
             st.session_state.data_input = aug_text
-            st.text_area("Lỗi keyboard", value=da.NLPKeyboard(aug_text), key="NLPKeyboard2")
+            value = da.NLPKeyboard(aug_text)
+            st.text_area("Lỗi keyboard", value=value, key="NLPKeyboard2")
+            if st.button("Lưu dữ liệu", key="NLPKeyboard3"):
+                st.session_state.data_input = value
+                st.text_area("Lỗi keyboard", value=st.session_state.data_input, key="NLPKeyboard4")
+                st.success("Lưu dữ liệu thành công!")
 elif selected_option == "Tiền xử lí dữ liệu":
     preprocessing_tab = ["Stopwords", "StemmingPorter", "StemmingSnowball", "Lemmatization", "PosTagging", "PosTaggingChart", "Spell Checker", "Ner", "Ner render"]
     st.header("Tiền xử lí dữ liệu")

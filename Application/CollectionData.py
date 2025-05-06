@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-from tkinter import filedialog
+import docx
+import json
+import pandas as pd
+from io import BytesIO
 
 ## Thu thập dữ liệu
 web_url = "https://vnexpress.net/"
@@ -30,11 +33,47 @@ def CollectionData():
     return df
 
 
-def Inputtxt(uploaded_file):
-    if uploaded_file is not None:
-        try:
-            content = uploaded_file.read().decode("utf-8")
+
+
+def read_file(uploaded_file):
+    """
+    Đọc dữ liệu từ các tệp DOCX, JSON, CSV, hoặc TXT.
+    """
+    if uploaded_file is None:
+        return None
+
+    try:
+        # Lấy tên tệp và phần mở rộng
+        file_name = uploaded_file.name
+        file_extension = file_name.lower().split('.')[-1]
+
+        # Xử lý theo loại tệp
+        if file_extension == 'txt':
+            # Đọc tệp văn bản (giữ logic ban đầu)
+            content = uploaded_file.read().decode('utf-8')
             return content
-        except Exception as e:
+
+        elif file_extension == 'docx':
+            # Đọc tệp DOCX
+            doc = docx.Document(BytesIO(uploaded_file.read()))
+            # Trích xuất văn bản từ các đoạn
+            content = '\n'.join([para.text for para in doc.paragraphs if para.text])
+            return content
+
+        elif file_extension == 'json':
+            # Đọc tệp JSON
+            content = json.load(uploaded_file)
+            return content
+
+        elif file_extension == 'csv':
+            # Đọc tệp CSV
+            df = pd.read_csv(uploaded_file)
+            return df
+
+        else:
+            # Phần mở rộng không được hỗ trợ
             return None
-    return None
+
+    except Exception as e:
+        print(f"Lỗi khi đọc tệp: {e}")
+        return None
