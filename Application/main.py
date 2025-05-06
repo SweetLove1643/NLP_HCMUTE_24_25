@@ -408,58 +408,284 @@ elif selected_option == "Tiền xử lí dữ liệu":
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(preprocessing_tab)
     with tab1:
         st.header("Loại bỏ Stopwords, dấu câu")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="Stopwords")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="Stopwords"
+        )
         if st.button("Tiền xử lí dữ liệu", key="Stopwords1"):
-            st.session_state.data_input = preprocessing_text
-            st.text_area("Loại bỏ Stopwords, dấu câu", value=pp.StopWord(preprocessing_text), key="Stopwords2")
-    with tab2:
-        st.header("StemmingPorter")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="StemmingPorter")
-        if st.button("Tiền xử lí dữ liệu", key="StemmingPorter1"):
-            st.session_state.data_input = preprocessing_text
-            st.text_area("StemmingPorter", value=pp.StemmingPorter(preprocessing_text), key="StemmingPorter2")
-    with tab3:
-        st.header("Stemming Snowball")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="StemmingSnowball")
-        if st.button("Tiền xử lí dữ liệu", key="StemmingSnowball1"):
-            st.session_state.data_input = preprocessing_text
-            st.text_area("Stemming Snowball", value=pp.StemmingSnowball(preprocessing_text), key="StemmingSnowball2")
-    with tab4:
-        st.header("Lemmatization")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="Lemmatization")
-        if st.button("Tiền xử lí dữ liệu", key="Lemmatization1"):
-            st.session_state.data_input = preprocessing_text
-            st.dataframe(pp.Lemmatization(preprocessing_text), use_container_width=True, key="Lemmatization2")
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.StopWord(preprocessing_text)
+                    if processed_data is not None and isinstance(processed_data, str):
+                        st.session_state.augmented_data['Stopwords'] = processed_data
+                        st.text_area("Loại bỏ Stopwords, dấu câu", value=processed_data, key="Stopwords2")
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm StopWord trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")    
+
+        if st.button("Lưu dữ liệu", key="StopwordsSave"):
+            try:
+                if 'Stopwords' in st.session_state.augmented_data and st.session_state.augmented_data['Stopwords']:
+                    st.session_state.data_input = st.session_state.augmented_data['Stopwords']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Loại bỏ Stopwords, dấu câu", value=st.session_state.data_input, key="Stopwords4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                        st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
+        with tab2:
+            st.header("StemmingPorter")
+            preprocessing_text = st.text_area(
+                label="Dữ liệu tiền xử lí",
+                value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+                key="StemmingPorter"
+            )
+            if st.button("Tiền xử lí dữ liệu", key="StemmingPorter1"):
+                try:
+                    if not preprocessing_text.strip():
+                        st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                    else:
+                        st.session_state.data_input = preprocessing_text
+                        processed_data = pp.StemmingPorter(preprocessing_text)
+                        if processed_data is not None and isinstance(processed_data, str):
+                            st.session_state.augmented_data['StemmingPorter'] = processed_data
+                            st.text_area("StemmingPorter", value=processed_data, key="StemmingPorter2")
+                        else:
+                            st.error("Không thể tiền xử lí dữ liệu. Hàm StemmingPorter trả về None hoặc giá trị không hợp lệ.")
+                except Exception as e:
+                    st.error(f"Lỗi khi tiền xử lí: {e}")
+
+            if st.button("Lưu dữ liệu", key="StemmingPorterSave"):
+                try:
+                    if 'StemmingPorter' in st.session_state.augmented_data and st.session_state.augmented_data['StemmingPorter']:
+                        st.session_state.data_input = st.session_state.augmented_data['StemmingPorter']
+                        if isinstance(st.session_state.data_input, str):
+                            st.text_area("StemmingPorter", value=st.session_state.data_input, key="StemmingPorter4")
+                        elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                            st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                            st.success("Lưu dữ liệu thành công!")
+                    else:
+                        st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+                except Exception as e:
+                    st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
+        with tab3:
+            st.header("Stemming Snowball")
+            preprocessing_text = st.text_area(
+                label="Dữ liệu tiền xử lí",
+                value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+                key="StemmingSnowball"
+            )
+            if st.button("Tiền xử lí dữ liệu", key="StemmingSnowball1"):
+                try:
+                    if not preprocessing_text.strip():
+                        st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                    else:
+                        st.session_state.data_input = preprocessing_text
+                        processed_data = pp.StemmingSnowball(preprocessing_text)
+                        if processed_data is not None and isinstance(processed_data, str):
+                            st.session_state.augmented_data['StemmingSnowball'] = processed_data
+                            st.text_area("Stemming Snowball", value=processed_data, key="StemmingSnowball2")
+                        else:
+                            st.error("Không thể tiền xử lí dữ liệu. Hàm StemmingSnowball trả về None hoặc giá trị không hợp lệ.")
+                except Exception as e:
+                    st.error(f"Lỗi khi tiền xử lí: {e}")
+
+            if st.button("Lưu dữ liệu", key="StemmingSnowballSave"):
+                try:
+                    if 'StemmingSnowball' in st.session_state.augmented_data and st.session_state.augmented_data['StemmingSnowball']:
+                        st.session_state.data_input = st.session_state.augmented_data['StemmingSnowball']
+                        if isinstance(st.session_state.data_input, str):
+                            st.text_area("Stemming Snowball", value=st.session_state.data_input, key="StemmingSnowball4")
+                        elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                            st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                            st.success("Lưu dữ liệu thành công!")
+                    else:
+                        st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+                except Exception as e:
+                    st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
+        with tab4:
+            st.header("Lemmatization")
+            preprocessing_text = st.text_area(
+                label="Dữ liệu tiền xử lí",
+                value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+                key="Lemmatization"
+            )
+            if st.button("Tiền xử lí dữ liệu", key="Lemmatization1"):
+                try:
+                    if not preprocessing_text.strip():
+                        st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                    else:
+                        st.session_state.data_input = preprocessing_text
+                        processed_data = pp.Lemmatization(preprocessing_text)
+                        if processed_data is not None and isinstance(processed_data, pd.DataFrame):
+                            st.session_state.augmented_data['Lemmatization'] = processed_data
+                            st.dataframe(processed_data, use_container_width=True, key="Lemmatization2")
+                        else:
+                            st.error("Không thể tiền xử lí dữ liệu. Hàm Lemmatization trả về None hoặc giá trị không hợp lệ.")
+                except Exception as e:
+                    st.error(f"Lỗi khi tiền xử lí: {e}")
+
+            if st.button("Lưu dữ liệu", key="LemmatizationSave"):
+                try:
+                    if 'Lemmatization' in st.session_state.augmented_data and isinstance(st.session_state.augmented_data['Lemmatization'], pd.DataFrame):
+                        st.session_state.data_input = st.session_state.augmented_data['Lemmatization']
+                        st.dataframe(st.session_state.data_input, use_container_width=True, key="Lemmatization4")
+                        st.success("Lưu dữ liệu thành công!")
+                    else:
+                        st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+                except Exception as e:
+                    st.error(f"Lỗi khi lưu dữ liệu: {e}")
     with tab5:
         st.header("PosTagging")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="PosTagging")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="PosTagging"
+        )
         if st.button("Tiền xử lí dữ liệu", key="PosTagging1"):
-            st.session_state.data_input = preprocessing_text
-            st.dataframe(pp.PosTagging(preprocessing_text), use_container_width=True, key="PosTagging2")
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.PosTagging(preprocessing_text)
+                    if processed_data is not None and isinstance(processed_data, pd.DataFrame):
+                        st.session_state.augmented_data['PosTagging'] = processed_data
+                        st.dataframe(processed_data, use_container_width=True, key="PosTagging2")
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm PosTagging trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")
+
+        if st.button("Lưu dữ liệu", key="PosTaggingSave"):
+            try:
+                if 'PosTagging' in st.session_state.augmented_data and isinstance(st.session_state.augmented_data['PosTagging'], pd.DataFrame):
+                    st.session_state.data_input = st.session_state.augmented_data['PosTagging']
+                    st.dataframe(st.session_state.data_input, use_container_width=True, key="PosTagging4")
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab6:
         st.header("PosTaggingChart")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="PosTaggingChart")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="PosTaggingChart"
+        )
         if st.button("Tiền xử lí dữ liệu", key="PosTaggingChart1"):
-            st.session_state.data_input = preprocessing_text
-            st.markdown(pp.PosTaggingChart(preprocessing_text), unsafe_allow_html=True)
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.PosTaggingChart(preprocessing_text)
+                    if processed_data:
+                        st.markdown(processed_data, unsafe_allow_html=True)
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm PosTaggingChart trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")
+
     with tab7:
         st.header("Spell Checker")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="SpellChecker")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="SpellChecker"
+        )
         if st.button("Tiền xử lí dữ liệu", key="SpellChecker1"):
-            st.session_state.data_input = preprocessing_text
-            st.text_area("Spell Checker (Sửa lại các từ viết sai)", value=pp.spellchecker(preprocessing_text), key="SpellChecker2")
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.spellchecker(preprocessing_text)
+                    if processed_data is not None and isinstance(processed_data, str):
+                        st.session_state.augmented_data['SpellChecker'] = processed_data
+                        st.text_area("Spell Checker (Sửa lại các từ viết sai)", value=processed_data, key="SpellChecker2")
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm spellchecker trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")
+
+        if st.button("Lưu dữ liệu", key="SpellCheckerSave"):
+            try:
+                if 'SpellChecker' in st.session_state.augmented_data and st.session_state.augmented_data['SpellChecker']:
+                    st.session_state.data_input = st.session_state.augmented_data['SpellChecker']
+                    st.text_area("Spell Checker (Sửa lại các từ viết sai)", value=st.session_state.data_input, key="SpellChecker4")
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab8:
         st.header("Ner")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="Ner")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="Ner"
+        )
         if st.button("Tiền xử lí dữ liệu", key="Ner1"):
-            st.session_state.data_input = preprocessing_text
-            st.dataframe(pp.Ner(preprocessing_text), use_container_width=True, key="Ner2")
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.Ner(preprocessing_text)
+                    if processed_data is not None and isinstance(processed_data, pd.DataFrame):
+                        st.session_state.augmented_data['Ner'] = processed_data
+                        st.dataframe(processed_data, use_container_width=True, key="Ner2")
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm Ner trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")
+
+        if st.button("Lưu dữ liệu", key="NerSave"):
+            try:
+                if 'Ner' in st.session_state.augmented_data and isinstance(st.session_state.augmented_data['Ner'], pd.DataFrame):
+                    st.session_state.data_input = st.session_state.augmented_data['Ner']
+                    st.dataframe(st.session_state.data_input, use_container_width=True, key="Ner4")
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu để lưu. Vui lòng nhấn 'Tiền xử lí dữ liệu' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab9:
         st.header("Ner render")
-        preprocessing_text = st.text_area(label="Dữ liệu tiền xử lí",value=st.session_state.data_input, key="NerRender")
+        preprocessing_text = st.text_area(
+            label="Dữ liệu tiền xử lí",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NerRender"
+        )
         if st.button("Tiền xử lí dữ liệu", key="NerRender1"):
-            st.session_state.data_input = preprocessing_text
-            st.markdown(pp.NerRender(preprocessing_text), unsafe_allow_html=True)
+            try:
+                if not preprocessing_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tiền xử lí.")
+                else:
+                    st.session_state.data_input = preprocessing_text
+                    processed_data = pp.NerRender(preprocessing_text)
+                    if processed_data:
+                        st.markdown(processed_data, unsafe_allow_html=True)
+                    else:
+                        st.error("Không thể tiền xử lí dữ liệu. Hàm NerRender trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tiền xử lí: {e}")
 elif selected_option == "Biểu diễn dữ liệu":
     st.header("Biểu diễn dữ liệu")
     vectorizer_tab = ["One Hot Encoding", 
