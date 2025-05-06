@@ -15,6 +15,8 @@ import Recommendation as rc
 # st.title("22110124 - Phan Văn Quân")
 if "data_input" not in st.session_state:
     st.session_state.data_input = ""
+if 'augmented_data' not in st.session_state:
+    st.session_state.augmented_data = {}  # Lưu dữ liệu tăng cường theo key của tab
 
 
 st.markdown(
@@ -97,98 +99,309 @@ elif selected_option == "Tăng cường dữ liệu":
     st.header("Tăng cường dữ liệu")
     tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(augment_tab)
     with tab1:
-        st.header("Thêm từ")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPInsert")
-        if st.button("Tăng cường", key="NLPInsert1"):
-            
-            st.session_state.data_input = aug_text
-            value = da.NLPInsert(aug_text)
-            st.text_area("Thêm từ", value=value, key="NLPInsert2")
-            if st.button("Lưu dữ liệu", key="NLPInsert3"):
-                st.session_state.data_input = value
-                print(st.session_state.data_input)
-                st.text_area("Thêm từ", value=st.session_state.data_input, key="NLPInsert4")
-                st.success("Lưu dữ liệu thành công!")
+        st.header("Thêm từ")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPInsert"
+        )
+        
+        # Nút Tăng cường
+        if st.button("Tăng cường", key="NLPInsert1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    # Lưu văn bản đã chỉnh sửa
+                    st.session_state.data_input = aug_text
+                    # Gọi hàm tăng cường
+                    value = da.NLPInsert(aug_text)
+                    # Debug: In giá trị để kiểm tra
+                    st.write(f"Debug - Giá trị trả về từ NLPInsert: {value}")
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPInsert'] = value
+                        st.text_area("Thêm từ", value=value, key="NLPInsert2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPInsert trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        # Nút Lưu dữ liệu
+        if st.button("Lưu dữ liệu", key="NLPInsert3"):
+            try:
+                # Kiểm tra xem có dữ liệu tăng cường không
+                if 'NLPInsert' in st.session_state.augmented_data and st.session_state.augmented_data['NLPInsert']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPInsert']
+                    # Hiển thị dữ liệu đã lưu
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Thêm từ", value=st.session_state.data_input, key="NLPInsert4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
     with tab2:
-        st.header("Thay từ")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSub")
-        if st.button("Tăng cường", key="NLPSub1"):
-            
-            st.session_state.data_input = aug_text
-            value=da.NLPSubstitute(aug_text)
-            st.text_area("Thay từ", value=value, key="NLPSub2")
-            if st.button("Lưu dữ liệu", key="NLPSub3"):
-                st.session_state.data_input = value
-                st.text_area("Thay từ", value=st.session_state.data_input, key="NLPSub4")
-                st.success("Lưu dữ liệu thành công!")
+        st.header("Thay từ")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPSub"
+        )
+        
+        # Nút Tăng cường
+        if st.button("Tăng cường", key="NLPSub1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPSubstitute(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPSub'] = value
+                        st.text_area("Thay từ", value=value, key="NLPSub2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPSubstitute trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        # Nút Lưu dữ liệu
+        if st.button("Lưu dữ liệu", key="NLPSub3"):
+            try:
+                if 'NLPSub' in st.session_state.augmented_data and st.session_state.augmented_data['NLPSub']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPSub']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Thay từ", value=st.session_state.data_input, key="NLPSub4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
 
     with tab3:
         st.header("Đổi vị trí")
-        aug_text = st.text_area(label="Dữ liệu tăng cường",value=st.session_state.data_input, key="NLPSwap")
-        if st.button("Tăng cường", key="NLPSwap1"):
-            
-            st.session_state.data_input = aug_text
-            value=da.NLPSwap(aug_text)
-            st.text_area("Đổi vị trí", value=value, key="NLPSwap2")
-            if st.button("Lưu dữ liệu", key="NLPSwap3"):
-                st.session_state.data_input = value
-                st.text_area("Đổi vị trí", value=st.session_state.data_input, key="NLPSwap4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPSwap"
+        )
+        
+        # Nút Tăng cường
+        if st.button("Tăng cường", key="NLPSwap1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPSwap(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPSwap'] = value
+                        st.text_area("Đổi vị trí", value=value, key="NLPSwap2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPSwap trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        # Nút Lưu dữ liệu
+        if st.button("Lưu dữ liệu", key="NLPSwap3"):
+            try:
+                if 'NLPSwap' in st.session_state.augmented_data and st.session_state.augmented_data['NLPSwap']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPSwap']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Đổi vị trí", value=st.session_state.data_input, key="NLPSwap4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab4:
         st.header("Back translate")
-        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPBackTranslate")
-        if st.button("Tăng cường", key="NLPBackTranslate1"):
-            st.session_state.data_input = aug_text
-            value = da.NLPBackTranslate(aug_text)
-            st.text_area("Back translate", value=value, key="NLPBackTranslate2")
-            if st.button("Lưu dữ liệu", key="NLPBackTranslate3"):
-                st.session_state.data_input = value
-                st.text_area("Back translate", value=st.session_state.data_input, key="NLPBackTranslate4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPBackTranslate"
+        )
+        
+        # Nút Tăng cường
+        if st.button("Tăng cường", key="NLPBackTranslate1"):
+            # try:
+            if not aug_text.strip():
+                st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+            else:
+                st.session_state.data_input = aug_text
+                value = da.NLPBackTranslate(aug_text)
+                if value is not None and isinstance(value, str):
+                    st.session_state.augmented_data['NLPBackTranslate'] = value
+                    st.text_area("Back translate", value=value, key="NLPBackTranslate2")
+                else:
+                    st.error("Không thể tăng cường dữ liệu. Hàm NLPBackTranslate trả về None hoặc giá trị không hợp lệ.")
+            # except Exception as e:
+            #     st.error(f"Lỗi khi tăng cường: {e}")
+
+        # Nút Lưu dữ liệu
+        if st.button("Lưu dữ liệu", key="NLPBackTranslate3"):
+            try:
+                if 'NLPBackTranslate' in st.session_state.augmented_data and st.session_state.augmented_data['NLPBackTranslate']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPBackTranslate']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Back translate", value=st.session_state.data_input, key="NLPBackTranslate4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab5:
         st.header("Thay thực thể")
-        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPReserved")
-        if st.button("Tăng cường", key="NLPReserved1"):
-            st.session_state.data_input = aug_text
-            value = da.NLPReserved(aug_text)
-            st.text_area("Thay thực thể", value=value, key="NLPReserved2")
-            if st.button("Lưu dữ liệu", key="NLPReserved3"):
-                st.session_state.data_input = value
-                st.text_area("Thay thực thể", value=st.session_state.data_input, key="NLPReserved4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPReserved"
+        )
+        if st.button("Tăng cường", key="NLPReserved1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPReserved(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPReserved'] = value
+                        st.text_area("Thay thực thể", value=value, key="NLPReserved2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPReserved trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        if st.button("Lưu dữ liệu", key="NLPReserved3"):
+            try:
+                if 'NLPReserved' in st.session_state.augmented_data and st.session_state.augmented_data['NLPReserved']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPReserved']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Thay thực thể", value=st.session_state.data_input, key="NLPReserved4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab6:
         st.header("Từ đồng nghĩa")
-        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPSynonym")
-        if st.button("Tăng cường", key="NLPSynonym1"):
-            st.session_state.data_input = aug_text
-            value = da.NLPSynonym(aug_text)
-            st.text_area("Từ đồng nghĩa", value=value, key="NLPSynonym2")
-            if st.button("Lưu dữ liệu", key="NLPSynonym3"):
-                st.session_state.data_input = value
-                st.text_area("Từ đồng nghĩa", value=st.session_state.data_input, key="NLPSynonym4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPSynonym"
+        )
+        if st.button("Tăng cường", key="NLPSynonym1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPSynonym(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPSynonym'] = value
+                        st.text_area("Từ đồng nghĩa", value=value, key="NLPSynonym2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPSynonym trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        if st.button("Lưu dữ liệu", key="NLPSynonym3"):
+            try:
+                if 'NLPSynonym' in st.session_state.augmented_data and st.session_state.augmented_data['NLPSynonym']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPSynonym']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Từ đồng nghĩa", value=st.session_state.data_input, key="NLPSynonym4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab7:
         st.header("Tách từ")
-        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPSplit")
-        if st.button("Tăng cường", key="NLPSplit1"):
-            st.session_state.data_input = aug_text
-            value = da.NLPSplit(aug_text)
-            st.text_area("Tách từ", value=value, key="NLPSplit2")
-            if st.button("Lưu dữ liệu", key="NLPSplit3"):
-                st.session_state.data_input = value
-                st.text_area("Tách từ", value=st.session_state.data_input, key="NLPSplit4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPSplit"
+        )
+        if st.button("Tăng cường", key="NLPSplit1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPSplit(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPSplit'] = value
+                        st.text_area("Tách từ", value=value, key="NLPSplit2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPSplit trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        if st.button("Lưu dữ liệu", key="NLPSplit3"):
+            try:
+                if 'NLPSplit' in st.session_state.augmented_data and st.session_state.augmented_data['NLPSplit']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPSplit']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Tách từ", value=st.session_state.data_input, key="NLPSplit4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
+
     with tab8:
         st.header("Lỗi keyboard")
-        aug_text = st.text_area(label="Dữ liệu tăng cường", value=st.session_state.data_input, key="NLPKeyboard")
-        if st.button("Tăng cường", key="NLPKeyboard1"):
-            st.session_state.data_input = aug_text
-            value = da.NLPKeyboard(aug_text)
-            st.text_area("Lỗi keyboard", value=value, key="NLPKeyboard2")
-            if st.button("Lưu dữ liệu", key="NLPKeyboard3"):
-                st.session_state.data_input = value
-                st.text_area("Lỗi keyboard", value=st.session_state.data_input, key="NLPKeyboard4")
-                st.success("Lưu dữ liệu thành công!")
+        aug_text = st.text_area(
+            label="Dữ liệu tăng cường",
+            value=st.session_state.data_input if isinstance(st.session_state.data_input, str) else str(st.session_state.data_input),
+            key="NLPKeyboard"
+        )
+        if st.button("Tăng cường", key="NLPKeyboard1"):
+            try:
+                if not aug_text.strip():
+                    st.warning("Vui lòng nhập dữ liệu để tăng cường.")
+                else:
+                    st.session_state.data_input = aug_text
+                    value = da.NLPKeyboard(aug_text)
+                    if value is not None and isinstance(value, str):
+                        st.session_state.augmented_data['NLPKeyboard'] = value
+                        st.text_area("Lỗi keyboard", value=value, key="NLPKeyboard2")
+                    else:
+                        st.error("Không thể tăng cường dữ liệu. Hàm NLPKeyboard trả về None hoặc giá trị không hợp lệ.")
+            except Exception as e:
+                st.error(f"Lỗi khi tăng cường: {e}")
+
+        if st.button("Lưu dữ liệu", key="NLPKeyboard3"):
+            try:
+                if 'NLPKeyboard' in st.session_state.augmented_data and st.session_state.augmented_data['NLPKeyboard']:
+                    st.session_state.data_input = st.session_state.augmented_data['NLPKeyboard']
+                    if isinstance(st.session_state.data_input, str):
+                        st.text_area("Lỗi keyboard", value=st.session_state.data_input, key="NLPKeyboard4")
+                    elif isinstance(st.session_state.data_input, (pd.DataFrame, dict, list)):
+                        st.write("Dữ liệu đã lưu:", st.session_state.data_input)
+                    st.success("Lưu dữ liệu thành công!")
+                else:
+                    st.warning("Không có dữ liệu tăng cường để lưu. Vui lòng nhấn 'Tăng cường' trước.")
+            except Exception as e:
+                st.error(f"Lỗi khi lưu dữ liệu: {e}")
 elif selected_option == "Tiền xử lí dữ liệu":
     preprocessing_tab = ["Stopwords", "StemmingPorter", "StemmingSnowball", "Lemmatization", "PosTagging", "PosTaggingChart", "Spell Checker", "Ner", "Ner render"]
     st.header("Tiền xử lí dữ liệu")
