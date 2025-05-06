@@ -10,6 +10,8 @@ import TextVectorizer as tv
 import ModelClassfication as mc
 import Chatbot
 import Recommendation as rc
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # st.set_page_config(page_title="22110124 - Phan Van Quan", page_icon=":sunglasses:")
 # st.title("22110124 - Phan Văn Quân")
@@ -17,6 +19,11 @@ if "data_input" not in st.session_state:
     st.session_state.data_input = ""
 if 'augmented_data' not in st.session_state:
     st.session_state.augmented_data = {}  # Lưu dữ liệu tăng cường theo key của tab
+# Khởi tạo st.session_state.total_accuracy
+if 'total_accuracy' not in st.session_state:
+    st.session_state.total_accuracy = pd.DataFrame(
+        columns=['Model', 'Vectorizer', 'DataSource', 'Accuracy']
+    )
 
 
 st.markdown(
@@ -776,8 +783,8 @@ elif selected_option == "Phân loại dữ liệu":
                          "FastText",
                          "Bert Tokenizer"]
     st.header("Phân loại dữ liệu")
-    classification_tab = ["MultinomialNB", "Logistics Regression", "SVM", "KNeighbors Classifier", "Decision Tree"]
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(classification_tab)
+    classification_tab = ["MultinomialNB", "Logistics Regression", "SVM", "KNeighbors Classifier", "Decision Tree", "Statistic Accuracy"]   
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(classification_tab)
     with tab1:
         st.header("MultinomialNB")
         datatype_selected = st.selectbox(label="Chọn nguồn dữ liệu", options=option_data_select, key="MultinomialNBdata")
@@ -788,6 +795,19 @@ elif selected_option == "Phân loại dữ liệu":
             acc, label_result = mc.multinomialnb(vectorizertype_selected, datatype_selected, st.session_state.data_input)
             st.write(f"Độ chính xác của mô hình: {acc}")
             st.write(f"Kết quả dự đoán: {label_result}")
+            # Tạo bản ghi mới
+            new_data = pd.DataFrame({
+                'Model': ["MultinomialNB"],
+                'Vectorizer': [vectorizertype_selected],
+                'DataSource': [datatype_selected],
+                'Accuracy': [float(acc)]
+            })
+
+            # Thêm vào st.session_state.total_accuracy
+            st.session_state.total_accuracy = pd.concat(
+                [st.session_state.total_accuracy, new_data],
+                ignore_index=True
+            )
 
     with tab2:
         st.header("Logistics Regression")
@@ -799,6 +819,19 @@ elif selected_option == "Phân loại dữ liệu":
             acc, label_result = mc.logisticsregression(vectorizertype_selected, datatype_selected, st.session_state.data_input)
             st.write(f"Độ chính xác của mô hình: {acc}")
             st.write(f"Kết quả dự đoán: {label_result}")
+            # Tạo bản ghi mới
+            new_data = pd.DataFrame({
+                'Model': ["Logistics Regression"],
+                'Vectorizer': [vectorizertype_selected],
+                'DataSource': [datatype_selected],
+                'Accuracy': [float(acc)]
+            })
+
+            # Thêm vào st.session_state.total_accuracy
+            st.session_state.total_accuracy = pd.concat(
+                [st.session_state.total_accuracy, new_data],
+                ignore_index=True
+            )
     with tab3:
         st.header("SVM")
         datatype_selected = st.selectbox(label="Chọn nguồn dữ liệu", options=option_data_select, key="SVMdata")
@@ -809,6 +842,19 @@ elif selected_option == "Phân loại dữ liệu":
             acc, label_result = mc.svm(vectorizertype_selected, datatype_selected, st.session_state.data_input)
             st.write(f"Độ chính xác của mô hình: {acc}")
             st.write(f"Kết quả dự đoán: {label_result}")
+            # Tạo bản ghi mới
+            new_data = pd.DataFrame({
+                'Model': ["SVM"],
+                'Vectorizer': [vectorizertype_selected],
+                'DataSource': [datatype_selected],
+                'Accuracy': [float(acc)]
+            })
+
+            # Thêm vào st.session_state.total_accuracy
+            st.session_state.total_accuracy = pd.concat(
+                [st.session_state.total_accuracy, new_data],
+                ignore_index=True
+            )
     with tab4:
         st.header("KNeighbors Classifier")
         datatype_selected = st.selectbox(label="Chọn nguồn dữ liệu", options=option_data_select, key="KNeighborsClassifierdata")
@@ -819,6 +865,19 @@ elif selected_option == "Phân loại dữ liệu":
             acc, label_result = mc.kneighborsclassifier(vectorizertype_selected, datatype_selected, st.session_state.data_input)
             st.write(f"Độ chính xác của mô hình: {acc}")
             st.write(f"Kết quả dự đoán: {label_result}")
+            # Tạo bản ghi mới
+            new_data = pd.DataFrame({
+                'Model': ["KNeighbors Classifier"],
+                'Vectorizer': [vectorizertype_selected],
+                'DataSource': [datatype_selected],
+                'Accuracy': [float(acc)]
+            })
+
+            # Thêm vào st.session_state.total_accuracy
+            st.session_state.total_accuracy = pd.concat(
+                [st.session_state.total_accuracy, new_data],
+                ignore_index=True
+            )
     with tab5:
         st.header("Decision Tree")
         datatype_selected = st.selectbox(label="Chọn nguồn dữ liệu", options=option_data_select, key="DecisionTreedate")
@@ -829,6 +888,55 @@ elif selected_option == "Phân loại dữ liệu":
             acc, label_result = mc.decisiontree(vectorizertype_selected, datatype_selected, st.session_state.data_input)
             st.write(f"Độ chính xác của mô hình: {acc}")
             st.write(f"Kết quả dự đoán: {label_result}")
+            # Tạo bản ghi mới
+            new_data = pd.DataFrame({
+                'Model': ["Decision Tree"],
+                'Vectorizer': [vectorizertype_selected],
+                'DataSource': [datatype_selected],
+                'Accuracy': [float(acc)]
+            })
+
+            # Thêm vào st.session_state.total_accuracy
+            st.session_state.total_accuracy = pd.concat(
+                [st.session_state.total_accuracy, new_data],
+                ignore_index=True
+            )
+    with tab6:
+        st.subheader("Biểu đồ so sánh Accuracy")
+        df = st.session_state.total_accuracy
+        st.dataframe(df, use_container_width=True, key="total_accuracy", hide_index=True)
+        
+        # Kiểm tra DataFrame
+        required_columns = ['Model', 'Vectorizer', 'DataSource', 'Accuracy']
+        if df.empty or len(df.columns) == 0:
+            st.warning("Chưa có dữ liệu để hiển thị biểu đồ.")
+        elif not all(col in df.columns for col in required_columns):
+            st.error("Dữ liệu thiếu các cột cần thiết: Model, Vectorizer, DataSource, Accuracy")
+        else:
+            try:
+                # Thiết lập kiểu biểu đồ
+                sns.set(style="whitegrid")
+                # Vẽ Grouped Bar Plot với Subplots
+                g = sns.catplot(
+                    data=df,
+                    x='Vectorizer',
+                    y='Accuracy',
+                    hue='Model',
+                    col='DataSource',
+                    kind='bar',
+                    height=5,
+                    aspect=1.2
+                )
+                # Tiêu đề và nhãn
+                g.set_axis_labels("Vectorizer", "Accuracy")
+                g.set_titles("Nguồn dữ liệu: {col_name}")
+                g.fig.suptitle("So sánh Accuracy của các mô hình theo Vectorizer và Nguồn dữ liệu", y=1.05)
+                # Hiển thị biểu đồ
+                st.pyplot(g.fig, use_container_width=True)
+            except Exception as e:
+                st.error(f"Lỗi khi vẽ biểu đồ: {e}")
+
+
 elif selected_option == "Recommendation":
     st.header("Recommendation")
     user_id = st.number_input("Nhập userid (1 -> 610)", min_value=1, max_value=610, value=1, key="user_id")
