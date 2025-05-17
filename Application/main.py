@@ -4,6 +4,7 @@ from numpy import triu
 import pandas as pd
 
 import CollectionData as cl
+import introduce
 import DataAugment as da
 import DataPreProcessing as pp
 import TextVectorizer as tv
@@ -39,7 +40,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-menu_options = ["Thu thập dữ liệu", 
+menu_options = ["Giới thiệu",
+                "Thu thập dữ liệu", 
                 "Tăng cường dữ liệu", 
                 "Tiền xử lí dữ liệu", 
                 "Biểu diễn dữ liệu", 
@@ -50,7 +52,9 @@ menu_options = ["Thu thập dữ liệu",
 st.sidebar.title("Menu")
 selected_option = st.sidebar.selectbox("Chọn chức năng", menu_options)
 
-if selected_option == "Thu thập dữ liệu":
+if selected_option == "Giới thiệu":
+    introduce.introduce()
+elif selected_option == "Thu thập dữ liệu":
     st.header("Thu thập dữ liệu")
     option_collectiondata = ["Crawl web", "Tải dữ liệu từ tệp"]
     tab1, tab2 = st.tabs(option_collectiondata)
@@ -945,3 +949,5 @@ elif selected_option == "Chatbot":
     Chatbot.start_generative_ai()
 
         
+
+
