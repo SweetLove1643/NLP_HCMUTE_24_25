@@ -1,4 +1,4 @@
-# streamlit run c:/Users/Admin/Documents/Study/Projects/HK6/NLP/Application/main.py
+# streamlit run f:/Study/Projects/HK6/NLP/Application/main.py
 import streamlit as st
 from numpy import triu
 import pandas as pd
@@ -13,8 +13,7 @@ import Recommendation as rc
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# st.set_page_config(page_title="22110124 - Phan Van Quan", page_icon=":sunglasses:")
-# st.title("22110124 - Phan Văn Quân")
+st.set_page_config(page_title="22110124 - Phan Van Quan", page_icon=":sunglasses:")
 if "data_input" not in st.session_state:
     st.session_state.data_input = ""
 if 'augmented_data' not in st.session_state:
@@ -123,8 +122,8 @@ elif selected_option == "Tăng cường dữ liệu":
                     st.session_state.data_input = aug_text
                     # Gọi hàm tăng cường
                     value = da.NLPInsert(aug_text)
-                    # Debug: In giá trị để kiểm tra
-                    st.write(f"Debug - Giá trị trả về từ NLPInsert: {value}")
+                    # # Debug: In giá trị để kiểm tra
+                    # st.write(f"Debug - Giá trị trả về từ NLPInsert: {value}")
                     if value is not None and isinstance(value, str):
                         st.session_state.augmented_data['NLPInsert'] = value
                         st.text_area("Thêm từ", value=value, key="NLPInsert2")
@@ -774,7 +773,7 @@ elif selected_option == "Biểu diễn dữ liệu":
             st.session_state.data_input = vectorizer_text
             st.write(tv.berttokenizer(vectorizer_text), key="BertTokenizer2")
 elif selected_option == "Phân loại dữ liệu":
-    option_data_select = ["fetch_20newsgroups", "IMDB", "SST", "Amazon Reviews", "TREC", "DBPedia"]
+    option_data_select = ["fetch_20newsgroups", "IMDB", "SST", "Amazon Reviews", "TREC", "  "]
     option_vectorizer = ["TF-IDF Vectorizer",
                          "Bag Of Word",
                          "Bag Of Word N-GRAM",

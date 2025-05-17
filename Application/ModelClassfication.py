@@ -29,19 +29,19 @@ def multinomialnb(vectorizer, data, input):
         datasets = fetch_20newsgroups()
         x, y = datasets.data, datasets.target
     elif data == "IMDB":
-        datasets = pd.read_csv("datasets/IMDBDataset.csv")
+        datasets = pd.read_csv("datasets/IMDBDataset.csv") # link: https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews?resource=download
         x, y = datasets['review'], datasets['sentiment'].map({'positive': 1, 'negative': 0})
     elif data =="SST":
-        datasets = pd.read_csv('datasets/SST.csv')
+        datasets = pd.read_csv('datasets/SST.csv') # link: https://www.kaggle.com/datasets/youssefaboelwafa/sst-dataset
         x, y = datasets['sentence'], datasets['label']
     elif data == "Amazon Reviews":
-        datasets = pd.read_csv('datasets/AmazonReviews.csv', nrows=20000, names=["label", "title", "review"])
+        datasets = pd.read_csv('datasets/AmazonReviews.csv', nrows=20000, names=["label", "title", "review"]) #link: https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
         x, y = datasets['review'], datasets['label'] - 1
     elif data == "TREC":
-        datasets = pd.read_csv('datasets/TREC.csv')
+        datasets = pd.read_csv('datasets/TREC.csv') # link: https://www.kaggle.com/datasets/thedevastator/the-trec-question-classification-dataset-a-longi
         x, y = datasets['text'] ,datasets['label-coarse']
     elif data == "DBPedia":
-        datasets = pd.read_csv('datasets/DBPEDIA.csv')
+        datasets = pd.read_csv('datasets/DBPEDIA.csv') #link: https://www.kaggle.com/datasets/danofer/dbpedia-classes
         x, y = datasets['text'], datasets['l1']
 
     
